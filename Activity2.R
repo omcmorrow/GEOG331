@@ -53,3 +53,138 @@ Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
      ylab = "Relative frequency",
      col = "grey50",
      border = "white")
+help(hist)
+help(paste)
+#Plotting histograms of four distinct sites
+#Aberdeen histogram with mean and standard deviation
+par(mfrow=c(2,2))
+Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
+                      freq=FALSE,
+                      main = paste(levels(datW$NAME)[1]),
+                      xlab = "Average daily temperature (degrees C)",
+                      ylab = "Relative frequency",
+                      col = "grey50",
+                      border = "white")
+abline(v=mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
+      col = "tomato3",
+      lwd = 3)
+abline(v=mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE) - sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
+       col = "tomato3",
+       lty = 3,
+       lwd = 3)
+abline(v = mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE) + sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE), 
+       col = "tomato3", 
+       lty = 3,
+       lwd = 3)
+#Livermore histogram with mean and standard deviation
+Livermore_hist <- hist(datW$TAVE[datW$siteN == 2],
+                      freq=FALSE,
+                      main = paste(levels(datW$NAME)[2]),
+                      xlab = "Average daily temperature (degrees C)",
+                      ylab = "Relative frequency",
+                      col = "grey50",
+                      border = "white")
+abline(v=mean(datW$TAVE[datW$siteN == 2],na.rm=TRUE),
+       col = "blue",
+       lwd = 3)
+abline(v=mean(datW$TAVE[datW$siteN == 2],na.rm=TRUE) - sd(datW$TAVE[datW$siteN == 2],na.rm=TRUE),
+       col = "blue",
+       lty = 3,
+       lwd = 3)
+abline(v = mean(datW$TAVE[datW$siteN == 2],na.rm=TRUE) + sd(datW$TAVE[datW$siteN == 2],na.rm=TRUE), 
+       col = "blue", 
+       lty = 3,
+       lwd = 3)
+#Mandan Experiment Station histogram with mean and standard deviation
+MES_hist <- hist(datW$TAVE[datW$siteN == 3],
+                       freq=FALSE,
+                       main = paste(levels(datW$NAME)[3]),
+                       xlab = "Average daily temperature (degrees C)",
+                       ylab = "Relative frequency",
+                       col = "grey50",
+                       border = "white")
+abline(v=mean(datW$TAVE[datW$siteN == 3],na.rm=TRUE),
+       col = "yellow",
+       lwd = 3)
+abline(v=mean(datW$TAVE[datW$siteN == 3],na.rm=TRUE) - sd(datW$TAVE[datW$siteN == 3],na.rm=TRUE),
+       col = "yellow",
+       lty = 3,
+       lwd = 3)
+abline(v = mean(datW$TAVE[datW$siteN == 3],na.rm=TRUE) + sd(datW$TAVE[datW$siteN == 3],na.rm=TRUE), 
+       col = "yellow", 
+       lty = 3,
+       lwd = 3)
+#Mormon Flat histogram with mean and standard deviation
+Mormon_Flat_hist <- hist(datW$TAVE[datW$siteN == 4],
+                 freq=FALSE,
+                 main = paste(levels(datW$NAME)[4]),
+                 xlab = "Average daily temperature (degrees C)",
+                 ylab = "Relative frequency",
+                 col = "grey50",
+                 border = "white")
+abline(v=mean(datW$TAVE[datW$siteN == 4],na.rm=TRUE),
+       col = "green",
+       lwd = 3)
+abline(v=mean(datW$TAVE[datW$siteN == 4],na.rm=TRUE) - sd(datW$TAVE[datW$siteN == 4],na.rm=TRUE),
+       col = "green",
+       lty = 3,
+       lwd = 3)
+abline(v = mean(datW$TAVE[datW$siteN == 4],na.rm=TRUE) + sd(datW$TAVE[datW$siteN == 4],na.rm=TRUE), 
+       col = "green", 
+       lty = 3,
+       lwd = 3)
+#Aberdeen histogram with normal distribution
+Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
+                      freq=FALSE,
+                      main = paste(levels(datW$NAME)[1]),
+                      xlab = "Average daily temperature (degrees C)",
+                      ylab = "Relative frequency",
+                      col = "grey50",
+                      border = "white")
+x.plot <- seq(-10,30, length.out = 100)
+y.plot <-  dnorm(seq(-10,30, length.out = 100),
+                 mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
+                 sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
+y.scaled <- (max(Aberdeen_hist$density)/max(y.plot)) * y.plot
+points(x.plot,
+       y.scaled, 
+       type = "l", 
+       col = "royalblue3",
+       lwd = 4, 
+       lty = 2)
+#Working with probability calculations and normal distribution
+help(dnorm)
+#Probability of temps below 0 degrees C at site 1
+pnorm(0,
+      mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
+      sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
+#Probability of temps below 5 degrees C at site 1
+pnorm(5,
+      mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
+      sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
+#Probability of temps between 0 and 5 degrees C at site 1
+pnorm(5,
+      mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
+      sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))- pnorm(0,
+                                                        mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
+                                                        sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
+#Probability of temps above 20 degrees C at site 1
+1 - pnorm(20,
+          mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
+          sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
+#High temp that occurs less than 10 percent of time at site 1
+qnorm(0.95,
+      mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
+      sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
+#Aberdeen high temp probability with plus 4 degree C mean
+1 - pnorm(18.51026,
+          mean(14.43227),
+          sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
+#Aberdeen precipitation histogram
+Aberdeen_hist <- hist(datW$PRCP[datW$siteN == 1],
+                      freq=FALSE,
+                      main = paste(levels(datW$NAME)[1]),
+                      xlab = "Daily precipitation",
+                      ylab = "Relative frequency",
+                      col = "grey50",
+                      border = "white")
