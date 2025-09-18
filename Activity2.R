@@ -65,13 +65,16 @@ Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
                       ylab = "Relative frequency",
                       col = "grey50",
                       border = "white")
+#Red mean line
 abline(v=mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
       col = "tomato3",
       lwd = 3)
+#Red lower standard deviation line
 abline(v=mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE) - sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
        col = "tomato3",
        lty = 3,
        lwd = 3)
+#Red upper standard deviation line
 abline(v = mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE) + sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE), 
        col = "tomato3", 
        lty = 3,
@@ -141,10 +144,13 @@ Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
                       ylab = "Relative frequency",
                       col = "grey50",
                       border = "white")
+#Plotting across range of values
 x.plot <- seq(-10,30, length.out = 100)
+#Probability density
 y.plot <-  dnorm(seq(-10,30, length.out = 100),
                  mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
                  sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
+#Scaling to fit the plot
 y.scaled <- (max(Aberdeen_hist$density)/max(y.plot)) * y.plot
 points(x.plot,
        y.scaled, 
@@ -188,3 +194,9 @@ Aberdeen_hist <- hist(datW$PRCP[datW$siteN == 1],
                       ylab = "Relative frequency",
                       col = "grey50",
                       border = "white")
+#Finding annual precipitation every year for each site
+annualPRCP <- aggregate(datW$PRCP, by=list(datW$year,datW$NAME), FUN="sum",na.rm=TRUE)
+annualPRCP
+#Mean annual precipitation for all sites
+averagePRCP <- aggregate(datW$PRCP, by=list(datW$NAME), FUN="mean",na.rm=TRUE)
+averagePRCP
