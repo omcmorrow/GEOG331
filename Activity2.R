@@ -85,17 +85,17 @@ Livermore_hist <- hist(datW$TAVE[datW$siteN == 2],
                       main = paste(levels(datW$NAME)[2]),
                       xlab = "Average daily temperature (degrees C)",
                       ylab = "Relative frequency",
-                      col = "grey50",
+                      col = "yellow",
                       border = "white")
 abline(v=mean(datW$TAVE[datW$siteN == 2],na.rm=TRUE),
-       col = "blue",
+       col = "tomato3",
        lwd = 3)
 abline(v=mean(datW$TAVE[datW$siteN == 2],na.rm=TRUE) - sd(datW$TAVE[datW$siteN == 2],na.rm=TRUE),
-       col = "blue",
+       col = "tomato3",
        lty = 3,
        lwd = 3)
 abline(v = mean(datW$TAVE[datW$siteN == 2],na.rm=TRUE) + sd(datW$TAVE[datW$siteN == 2],na.rm=TRUE), 
-       col = "blue", 
+       col = "tomato3", 
        lty = 3,
        lwd = 3)
 #Mandan Experiment Station histogram with mean and standard deviation
@@ -104,17 +104,17 @@ MES_hist <- hist(datW$TAVE[datW$siteN == 3],
                        main = paste(levels(datW$NAME)[3]),
                        xlab = "Average daily temperature (degrees C)",
                        ylab = "Relative frequency",
-                       col = "grey50",
+                       col = "green",
                        border = "white")
 abline(v=mean(datW$TAVE[datW$siteN == 3],na.rm=TRUE),
-       col = "yellow",
+       col = "tomato3",
        lwd = 3)
 abline(v=mean(datW$TAVE[datW$siteN == 3],na.rm=TRUE) - sd(datW$TAVE[datW$siteN == 3],na.rm=TRUE),
-       col = "yellow",
+       col = "tomato3",
        lty = 3,
        lwd = 3)
 abline(v = mean(datW$TAVE[datW$siteN == 3],na.rm=TRUE) + sd(datW$TAVE[datW$siteN == 3],na.rm=TRUE), 
-       col = "yellow", 
+       col = "tomato3", 
        lty = 3,
        lwd = 3)
 #Mormon Flat histogram with mean and standard deviation
@@ -123,17 +123,17 @@ Mormon_Flat_hist <- hist(datW$TAVE[datW$siteN == 4],
                  main = paste(levels(datW$NAME)[4]),
                  xlab = "Average daily temperature (degrees C)",
                  ylab = "Relative frequency",
-                 col = "grey50",
+                 col = "blue",
                  border = "white")
 abline(v=mean(datW$TAVE[datW$siteN == 4],na.rm=TRUE),
-       col = "green",
+       col = "tomato3",
        lwd = 3)
 abline(v=mean(datW$TAVE[datW$siteN == 4],na.rm=TRUE) - sd(datW$TAVE[datW$siteN == 4],na.rm=TRUE),
-       col = "green",
+       col = "tomato3",
        lty = 3,
        lwd = 3)
 abline(v = mean(datW$TAVE[datW$siteN == 4],na.rm=TRUE) + sd(datW$TAVE[datW$siteN == 4],na.rm=TRUE), 
-       col = "green", 
+       col = "tomato3", 
        lty = 3,
        lwd = 3)
 #Aberdeen histogram with normal distribution
@@ -197,6 +197,16 @@ Aberdeen_hist <- hist(datW$PRCP[datW$siteN == 1],
 #Finding annual precipitation every year for each site
 annualPRCP <- aggregate(datW$PRCP, by=list(datW$year,datW$NAME), FUN="sum",na.rm=TRUE)
 annualPRCP
+#Livermore annual precipitation histogram
+Livermore_annPRCP <- aggregate(datW$PRCP[datW$siteN == 2], by=list(datW$year,datW$NAME), FUN="sum",na.rm=TRUE)
+
+Livermore_hist <- hist(annualPRCP[datW$siteN == 2],
+                      freq=FALSE,
+                      main = paste(levels(datW$NAME)[2]),
+                      xlab = "Daily precipitation",
+                      ylab = "Relative frequency",
+                      col = "grey50",
+                      border = "white")
 #Mean annual precipitation for all sites
-averagePRCP <- aggregate(datW$PRCP, by=list(datW$NAME), FUN="mean",na.rm=TRUE)
-averagePRCP
+average_annPRCP <- aggregate(annualPRCP, by=list(datW$NAME), FUN="mean",na.rm=TRUE)
+average_annPRCP
