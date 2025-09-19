@@ -1,3 +1,4 @@
+###Vector and matrix practice
 #Vector of tree heights in meters
 heights <- c(30,41,20,22)
 #Converting to cm
@@ -13,6 +14,8 @@ Mat.bycol
 Mat.bycol[1,2]
 Mat.bycol[1,]
 Mat.bycol[,2]
+###Question 1
+##Using dataframes
 #Reading in weather station file
 datW <- read.csv("Z:/omcmorrow/noaa_weather/2011124.csv",stringsAsFactors = T)
 #More info on dataframe
@@ -22,6 +25,8 @@ datW$dateF <- as.Date(datW$DATE, "%Y-%m-%d")
 #Create date column only including years
 #Indicate that it should be treated as numeric data
 datW$year <- as.numeric(format(datW$dateF,"%Y"))
+###Question 2
+##Understanding different forms of data
 #Numeric data example vector
 num_example <- c(5.4,7.9,10,3.6,15)
 num_example
@@ -34,6 +39,8 @@ char_example
 #Factor data example vector
 fact_example <- factor(c("yes","no","no","yes","no"))
 fact_example
+###Question 3
+##Looking at temperature data and generating Aberdeen histogram
 #All unique site names
 unique(datW$NAME)
 #Mean maximum temp for Aberdeen
@@ -43,7 +50,7 @@ datW$TAVE <- datW$TMIN + ((datW$TMAX-datW$TMIN)/2)
 #Finding mean across all sites
 averageTemp <- aggregate(datW$TAVE, by=list(datW$NAME), FUN="mean",na.rm=TRUE)
 averageTemp
-#Converting level to number for factor data type
+#Converting level to numeric data type
 datW$siteN <- as.numeric(datW$NAME)
 #Making histogram for the first site in levels
 Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
@@ -55,8 +62,10 @@ Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
      border = "white")
 help(hist)
 help(paste)
-#Plotting histograms of four distinct sites
+###Question 4
+##Plotting histograms of four distinct sites including Aberdeen
 #Aberdeen histogram with mean and standard deviation
+#Have all four histograms appear in same work space
 par(mfrow=c(2,2))
 Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
                       freq=FALSE,
@@ -136,6 +145,8 @@ abline(v = mean(datW$TAVE[datW$siteN == 4],na.rm=TRUE) + sd(datW$TAVE[datW$siteN
        col = "tomato3", 
        lty = 3,
        lwd = 3)
+###Question 5
+##Plotting normal distribution from mean and standard deviation
 #Aberdeen histogram with normal distribution
 Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
                       freq=FALSE,
@@ -146,11 +157,11 @@ Aberdeen_hist <- hist(datW$TAVE[datW$siteN == 1],
                       border = "white")
 #Plotting across range of values
 x.plot <- seq(-10,30, length.out = 100)
-#Probability density
+#Plotting probability density
 y.plot <-  dnorm(seq(-10,30, length.out = 100),
                  mean(datW$TAVE[datW$siteN == 1],na.rm=TRUE),
                  sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
-#Scaling to fit the plot
+#Scaling values to fit the plot
 y.scaled <- (max(Aberdeen_hist$density)/max(y.plot)) * y.plot
 points(x.plot,
        y.scaled, 
@@ -158,7 +169,9 @@ points(x.plot,
        col = "royalblue3",
        lwd = 4, 
        lty = 2)
-#Working with probability calculations and normal distribution
+###Question 6
+##Working with probability calculations and normal distribution
+#More info on functions of normal distribution
 help(dnorm)
 #Probability of temps below 0 degrees C at site 1
 pnorm(0,
@@ -184,29 +197,47 @@ qnorm(0.95,
       sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
 #Aberdeen high temp probability with plus 4 degree C mean
 1 - pnorm(18.51026,
+          #New mean value plugged in
           mean(14.43227),
           sd(datW$TAVE[datW$siteN == 1],na.rm=TRUE))
-#Aberdeen precipitation histogram
+###Question 7
+##Daily precipitation histogram and not normal distribution
+#Aberdeen daily precipitation histogram
 Aberdeen_hist <- hist(datW$PRCP[datW$siteN == 1],
                       freq=FALSE,
                       main = paste(levels(datW$NAME)[1]),
-                      xlab = "Daily precipitation",
-                      ylab = "Relative frequency",
-                      col = "grey50",
+                      xlab = "Daily Precipitation (mm)",
+                      ylab = "Relative Frequency",
+                      col = "blue",
                       border = "white")
+###Question 8
+##Using sum function to find annual precipitation
 #Finding annual precipitation every year for each site
-annualPRCP <- aggregate(datW$PRCP, by=list(datW$year,datW$NAME), FUN="sum",na.rm=TRUE)
-annualPRCP
+annprcp <- aggregate(datW$PRCP, by=list(datW$year,datW$NAME), FUN="sum",na.rm=TRUE)
+annprcp
+#Livermore annual precipitation
+annprcp_liv <- aggregate(datW$PRCP[datW$siteN == 2], by=list(datW$year[datW$siteN == 2]), FUN="sum",na.rm=TRUE)
+annprcp_liv
+#Adding column names for Livermore data
+colnames(annprcp_liv) <- c("Year","Total PRCP (mm)")
+#Treat the year column as numeric data
+annprcp_liv$Year <- as.numeric(annprcp_liv$Year)
 #Livermore annual precipitation histogram
-Livermore_annPRCP <- aggregate(datW$PRCP[datW$siteN == 2], by=list(datW$year,datW$NAME), FUN="sum",na.rm=TRUE)
-
-Livermore_hist <- hist(annualPRCP[datW$siteN == 2],
+Livermore_hist <- hist(annprcp_liv$'Total PRCP (mm)',
                       freq=FALSE,
                       main = paste(levels(datW$NAME)[2]),
-                      xlab = "Daily precipitation",
-                      ylab = "Relative frequency",
-                      col = "grey50",
+                      xlab = "Annual Precipitation (mm)",
+                      ylab = "Relative Frequency",
+                      col = "red",
                       border = "white")
-#Mean annual precipitation for all sites
-average_annPRCP <- aggregate(annualPRCP, by=list(datW$NAME), FUN="mean",na.rm=TRUE)
-average_annPRCP
+###Question 9
+##Finding mean annual precipitation for all sites
+#Adding column names for annual precipitation data
+colnames(annprcp) <- c("Year","Name","Average Annual PRCP (mm)")
+#Using mean for function within aggregate
+avg_annprcp <- aggregate(annprcp$'Average Annual PRCP (mm)', by=list(annprcp$'Name'), FUN="mean",na.rm=TRUE)
+avg_annprcp
+annprcp
+#Adding column names for average annual precipitation data
+colnames(avg_annprcp) <- c("NAME","Mean Annual PRCP (mm)")
+avg_annprcp
