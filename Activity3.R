@@ -87,8 +87,19 @@ points(datW$DD[lightscale > 0], lightscale[lightscale > 0],
 #Creating new air temp column
 datW$air.tempQ2 <- ifelse(datW$precipitation  >= 2 & datW$lightning.acvitivy >0, NA,
                           ifelse(datW$precipitation > 5, NA, datW$air.tempQ1))
+#Asserting equal vector length of lightning.acvitivy and precipitation
+assert <- function(statement,err.message){
+  if(statement == FALSE){
+    print(err.message)
+  }
+}
+assert(length(datW$lightning.acvitivy) == length(datW$precipitation), "error: unequal length")
 ###Question 6
 ##Removing suspect measurements from overall wind speed measurements
+datW$wind.speedQ1 <- ifelse(datW$wind.speed < 0, NA, datW$wind.speed)
+quantile(datW$wind.speedQ1)
+datW$wind.speedQ2 <- ifelse(datW$precipitation  >= 2 & datW$lightning.acvitivy >0, NA,
+                          ifelse(datW$precipitation > 5, NA, datW$air.tempQ1))
 ###Question 7
 ##Checking that soil temp and soil moisture measurements are reliable leading up to sensor outage
 ###Question 8
