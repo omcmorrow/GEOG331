@@ -37,3 +37,61 @@ install.packages(c("lubridate"))
 #Commenting install.packages(c("lubridate")) for ease
 #Using library function to load in packages to work environment
 library(lubridate)
+#Converting date to standardized format
+dates <- mdy_hm(datW$timestamp, tz= "America/New_York")
+#Calculating day of year
+datW$doy <- yday(dates)
+#Calculating hour in the day
+datW$hour <- hour(dates) + (minute(dates)/60)
+#Calculating decimal day of year
+datW$DD <- datW$doy + (datW$hour/24)
+datW[1,]
+#Determining number of values that have missing data for each sensor observation
+#Air temp
+length(which(is.na(datW$air.temperature)))
+#Wind speed
+length(which(is.na(datW$wind.speed)))
+#Precipitation
+length(which(is.na(datW$precipitation)))
+#Soil temp
+length(which(is.na(datW$soil.moisture)))
+#Soil moisture
+length(which(is.na(datW$soil.temp)))
+#Plotting soil moisture to visualize missing data
+plot(datW$DD, datW$soil.moisture, pch=19, type="b", xlab = "Day of Year",
+     ylab="Soil moisture (cm3 water per cm3 soil)")
+#Plotting air temp to visually compare with reasonable data
+plot(datW$DD, datW$air.temperature, pch=19, type="b", xlab = "Day of Year",
+     ylab="Air temperature (degrees C)")
+#Creating a new data column to convert unreliable data to NA
+datW$air.tempQ1 <- ifelse(datW$air.temperature < 0, NA, datW$air.temperature)
+#Checking values at the extreme ranges of the data
+quantile(datW$air.tempQ1)
+#Checking the days with abnormally low air temp
+datW[datW$air.tempQ1 < 8,]  
+#Checking the days with abnormally high air temp
+datW[datW$air.tempQ1 > 33,]  
+###Question 5
+##Plotting precipitation and lightning strikes to determine correlation
+#Normalizing lightning strikes to match precipitation
+lightscale <- (max(datW$precipitation)/max(datW$lightning.acvitivy)) * datW$lightning.acvitivy
+plot(datW$DD , datW$precipitation, xlab = "Day of Year", ylab = "Precipitation & lightning",
+     type="n")
+#Plotting precipitation points (semi-transparent) only when precipitation is present
+points(datW$DD[datW$precipitation > 0], datW$precipitation[datW$precipitation > 0],
+       col= rgb(95/255,158/255,160/255,.5), pch=15)        
+#Plotting lightning points (red) only when lightning is present
+points(datW$DD[lightscale > 0], lightscale[lightscale > 0],
+       col= "tomato3", pch=19)
+#Filtering all values with lightning that coincides with precipitation greater than 2mm or only precipitation over 5mm
+#Creating new air temp column
+datW$air.tempQ2 <- ifelse(datW$precipitation  >= 2 & datW$lightning.acvitivy >0, NA,
+                          ifelse(datW$precipitation > 5, NA, datW$air.tempQ1))
+###Question 6
+##Removing suspect measurements from overall wind speed measurements
+###Question 7
+##Checking that soil temp and soil moisture measurements are reliable leading up to sensor outage
+###Question 8
+##Creating a table with average air temp, wind speed, soil moisture, soil temp, and total precipitation for study period
+###Question 9
+##Plotting soil moisture, air temp, soil temp, and precipitation for entire study period
