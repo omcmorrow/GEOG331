@@ -99,7 +99,9 @@ assert(length(datW$lightning.acvitivy) == length(datW$precipitation), "error: un
 datW$wind.speedQ1 <- ifelse(datW$wind.speed < 0, NA, datW$wind.speed)
 quantile(datW$wind.speedQ1)
 datW$wind.speedQ2 <- ifelse(datW$precipitation  >= 2 & datW$lightning.acvitivy >0, NA,
-                          ifelse(datW$precipitation > 5, NA, datW$air.tempQ1))
+                          ifelse(datW$precipitation > 5, NA, datW$wind.speed))
+#Asserting equal length between filtered wind speed and air temp
+assert(sum(is.na(datW$wind.speedQ6)) > sum(is.na(datW$wind.speed)), "error: data has not been filtered")
 ###Question 7
 ##Checking that soil temp and soil moisture measurements are reliable leading up to sensor outage
 #Plot all four plots in the same window
