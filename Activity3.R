@@ -102,7 +102,43 @@ datW$wind.speedQ2 <- ifelse(datW$precipitation  >= 2 & datW$lightning.acvitivy >
                           ifelse(datW$precipitation > 5, NA, datW$air.tempQ1))
 ###Question 7
 ##Checking that soil temp and soil moisture measurements are reliable leading up to sensor outage
+#Plot all four plots in the same window
+par(mfrow=c(2,2))
+plot(datW$DD, datW$soil.moisture, pch=19, type="b", xlab = "Day of Year",
+     ylab="Soil moisture (cm3 water per cm3 soil)")
+plot(datW$DD, datW$soil.temp, pch=19, type="b", xlab = "Day of Year",
+     ylab="Soil temperature (degrees C)")
+plot(datW$DD, datW$air.temperature, pch=19, type="b", xlab = "Day of Year",
+     ylab="Air temperature (degrees C)")
+plot(datW$DD, datW$precipitation, pch=19, type="b", xlab = "Day of Year",
+     ylab="Precipitation (mm)")
 ###Question 8
 ##Creating a table with average air temp, wind speed, soil moisture, soil temp, and total precipitation for study period
+#Finding mean air temp and number of observations used for calculation
+mean_airtemp <- mean(datW$air.tempQ2, na.rm=TRUE)
+num_airtemp_obs <- sum(!is.na(datW$air.tempQ2))
+print(mean_airtemp)
+print(num_airtemp_obs)
+#Finding mean soil temp and number of observations used for calculation
+mean_soiltemp <- mean(datW$soil.temp, na.rm=TRUE)
+num_soiltemp_obs <- sum(!is.na(datW$soil.temp))
+print(mean_soiltemp)
+print(num_soiltemp_obs)
+#Finding mean wind speed and number of observations used for calculation
+mean_windspeed <- mean(datW$wind.speedQ2, na.rm=TRUE)
+num_windspeed_obs <- sum(!is.na(datW$wind.speedQ2))
+print(mean_windspeed)
+print(num_windspeed_obs)
+#Finding mean soil moisture and number of observations used for calculation
+mean_soilmois <- mean(datW$soil.moisture, na.rm=TRUE)
+num_soilmois_obs <- sum(!is.na(datW$soil.moisture))
+print(mean_soilmois)
+print(num_soilmois_obs)
+#Finding total precipitation and number of observations used for calculation
+total_prcp <- sum(datW$precipitation)
+num_prcp_obs <- sum(!is.na(datW$precipitation))
+print(total_prcp)
+print(num_prcp_obs)
 ###Question 9
 ##Plotting soil moisture, air temp, soil temp, and precipitation for entire study period
+#Same code as Question 7
