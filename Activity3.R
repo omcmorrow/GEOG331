@@ -96,26 +96,36 @@ assert <- function(statement,err.message){
 assert(length(datW$lightning.acvitivy) == length(datW$precipitation), "error: unequal length")
 ###Question 6
 ##Removing suspect measurements from overall wind speed measurements
-datW$wind.speedQ1 <- ifelse(datW$wind.speed < 0, NA, datW$wind.speed)
-quantile(datW$wind.speedQ1)
 datW$wind.speedQ2 <- ifelse(datW$precipitation  >= 2 & datW$lightning.acvitivy >0, NA,
                           ifelse(datW$precipitation > 5, NA, datW$wind.speed))
 #Asserting equal length between filtered wind speed and air temp
-assert(sum(is.na(datW$wind.speedQ6)) > sum(is.na(datW$wind.speed)), "error: data has not been filtered")
+assert(sum(is.na(datW$wind.speedQ2)) > sum(is.na(datW$wind.speed)), "error: data has not been filtered")
+#Plotting filtered wind speed data
+plot(datW$DD, datW$wind.speedQ2, pch=19, type="b", xlab = "Day of Year",
+     ylab="Filtered Wind Speed")
 ###Question 7
 ##Checking that soil temp and soil moisture measurements are reliable leading up to sensor outage
-#Plot all four plots in the same window
-par(mfrow=c(2,2))
-plot(datW$DD, datW$soil.moisture, pch=19, type="b", xlab = "Day of Year",
-     ylab="Soil moisture (cm3 water per cm3 soil)")
-plot(datW$DD, datW$soil.temp, pch=19, type="b", xlab = "Day of Year",
-     ylab="Soil temperature (degrees C)")
-plot(datW$DD, datW$air.temperature, pch=19, type="b", xlab = "Day of Year",
-     ylab="Air temperature (degrees C)")
-plot(datW$DD, datW$precipitation, pch=19, type="b", xlab = "Day of Year",
-     ylab="Precipitation (mm)")
+#Plotting soil temp vs air temp
+#Using par, axis, and mtext functions to add a second y axis and group of data to plot
+par(mar=c(5,4,4,4)+0.1)
+plot(datW$DD , datW$air.tempQ2, type = "b", xlab = "Day of year", ylab = "Air Temperature (Celsius)")
+points(datW$DD, datW$air.tempQ2, col= "red")
+par(new = TRUE)
+plot(datW$DD , datW$soil.temp, type = "b", col="blue", xaxt = "n", yaxt = "n", ylab = "", xlab = "")
+axis(side=4)
+mtext("Soil Temperature (degrees C)", side = 4, line = 3)
+legend("bottomright", cex = 0.5, legend = c("Air Temperature (degrees C)", "Soil Temperature (degrees C)"), col = c("red","blue"), lty = c(2), pch=c(1))
+#Plotting precipitation and soil moisture with similar functions
+par(mar=c(5,4,4,4)+0.1)
+plot(datW$DD , datW$precipitation, type = "b", xlab = "Day of year", ylab = "Precipitation (mm)")
+points(datW$DD, datW$precipitation, col= "red")
+par(new = TRUE)
+plot(datW$DD , datW$soil.moisture, type = "b", col="blue", xaxt = "n", yaxt = "n", ylab = "", xlab = "")
+axis(side=4)
+mtext("Soil moisture (cm3 water per cm3 soil)", side = 4, line = 3)
+legend("topright", cex = 0.5, legend = c("Precipitation (mm)", "Soil moisture (cm3 water per cm3 soil)"), col = c("red","blue"), lty = c(2), pch=c(1))
 ###Question 8
-##Creating a table with average air temp, wind speed, soil moisture, soil temp, and total precipitation for study period
+##Calculating average air temp, wind speed, soil moisture, soil temp, and total precipitation for study period
 #Finding mean air temp and number of observations used for calculation
 mean_airtemp <- mean(datW$air.tempQ2, na.rm=TRUE)
 num_airtemp_obs <- sum(!is.na(datW$air.tempQ2))
@@ -143,4 +153,14 @@ print(total_prcp)
 print(num_prcp_obs)
 ###Question 9
 ##Plotting soil moisture, air temp, soil temp, and precipitation for entire study period
-#Same code as Question 7
+#Plot all four plots in the same window
+par(mfrow=c(2,2))
+plot(datW$DD, datW$soil.moisture, pch=19, type="b", xlab = "Day of Year",
+     ylab="Soil moisture (cm3 water per cm3 soil)")
+plot(datW$DD, datW$soil.temp, pch=19, type="b", xlab = "Day of Year",
+     ylab="Soil temperature (degrees C)")
+plot(datW$DD, datW$air.temperature, pch=19, type="b", xlab = "Day of Year",
+     ylab="Air temperature (degrees C)")
+plot(datW$DD, datW$precipitation, pch=19, type="b", xlab = "Day of Year",
+     ylab="Precipitation (mm)")
+
