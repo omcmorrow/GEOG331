@@ -17,9 +17,16 @@ library(tidyverse)
 #3. iris sepal length x petal length
 
 # hint: consider using a list, and also new vectors for regression variables
-
-
-
+versicolor <- iris[iris$Species == "versicolor",]
+reg_index <- versicolor(c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"))
+reg_list <- 
+sl_w <- lm(versicolor$Sepal.Length ~ versicolor$Sepal.Width)
+pl_w <- lm(versicolor$Petal.Length ~ versicolor$Petal.Width)
+sl_pl <- lm(versicolor$Sepal.Length ~ versicolor$Petal.Length)
+for(i in 1:3){
+  
+}
+versicolor
 #####################################
 ##### Part 2: data in dplyr     #####
 #####################################
