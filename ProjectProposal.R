@@ -9,7 +9,7 @@ install.packages("ggplot2")
 library(ggplot2)
 ggplot(data = datW, aes(x = time, y = value)) + scale_y_log10() + geom_point() +
   labs(title = "Daily Discharge for Desoto, CO (1998-2025)",
-     x = "Day of Year",
+     x = "Time (1998 - 2025)",
      y = "Discharge (cubic ft/s)")
   
   
