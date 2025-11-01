@@ -41,18 +41,48 @@ datP$decDay <- datP$doy + (datP$hour/24)
 #Calculating decimal year including leap years
 datP$decYear <- ifelse(leap_year(datP$year),datP$year + (datP$decDay/366),
                        datP$year + (datP$decDay/365))
-#Reading in data to check date formatting
-head(datD)
+#Reading in decimal year data to check date formatting
+print(datD)
+
 ###Question 3###
 #Plotting discharge
 plot(datD$decYear, datD$discharge, type="l", xlab="Year", ylab=expression(paste("Discharge ft"^"3 ","sec"^"-1")))
 #Finding number of observations in streamflow data
-str(datH)
+str(datD)
 #Finding number of observations in precipitation data
 str(datP)
-#Finding frequencies of observations
+#Creating discharge vector
 discharge <- (datD$discharge)
+#Creating precipitation vector
+precip <- (datP$HPCP)
+#Finding frequency of discharge observations
 dis_freq_table <- table(discharge)
 print(dis_freq_table)
+#Finding frequency of precipitation observations
+precip_freq_table <- table(precip)
+print(precip_freq_table)
+
+###Question 4###
+#Documentation on expression function
+?expression
+
 ###Question 5###
+#Calculating average daily discharge
+aveF <- aggregate(datD$discharge, by=list(datD$doy), FUN="mean")
+#Formatting respective columns
+colnames(aveF) <- c("doy","dailyAve")
+#Calculating standard deviation of daily discharge
+sdF <- aggregate(datD$discharge, by=list(datD$doy), FUN="sd")
+#Formatting respective columns
+colnames(sdF) <- c("doy","dailySD")
+#Starting a new plot window with standard size
+dev.new(width=8,height=8)
+#Creating larger plot margins
+par(mai=c(1,1,1,1))
+#Plotting average daily discharge
+plot(aveF$doy,aveF$dailyAve, 
+     type="l", 
+     xlab="Year", 
+     ylab=expression(paste("Discharge ft"^"3 ","sec"^"-1")),
+     lwd=2)
 
