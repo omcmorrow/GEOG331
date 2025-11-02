@@ -139,25 +139,35 @@ legend("topright", c("Mean Discharge for All Years","1 Standard Deviation","2017
 ###Question 7###
 #Finding what days have full 24 hours of measurements
 precip_agg <- aggregate(datP$HPCP, by=list(datP$year, datP$doy), FUN="length")
-colnames(precip_agg) <- c("Year", "DOY", "Observations")
+colnames(precip_agg) <- c("year", "doy", "observations")
 print(precip_agg)
-#Filtering data for only days with 24 hours of measurements
-full_precip <- subset(precip_agg, Observations == 24)
+dates_table <- table(datP$jdate)
+print(dates_table)
+#Creating dataframe for only days with 24 hours of measurements
+dat_full_precip <- data.frame(subset(precip_agg, observations == 24))
 print(full_precip)
-
-#Filtering data for all other days with less than 24 hours of measurements
-other_precip <- subset(precip_agg, Observations < 24)
-print(other_precip)
-#Plotting all discharge measurements and symbolizing days with full precipitation measurements
+#Joining together full precipitation data days to discharge
+dat_full_merge <- merge(x = datD, y = dat_full_precip, by = "doy", all.x = TRUE)
+print(dat_full_merge[1,])
+#Joining together all other precipitation data days to discharge
+#Plotting all discharge measurements
 dev.new(width=8,height=8)
 par(mai=c(1,1,1,1))
-plot(datD$decYear, datD$discharge, 
-     type="l",
+plot(datD$decYear, datD$discharge,
+     type="h",
      col="blue",
      xlab="Date", 
      ylab=expression(paste("Discharge ft"^"3 ","sec"^"-1")),
      main="Discharge Overlaid with Days of Complete Precipitation Measurements",
      lwd=2)
-points(full_precip$DOY, datD$discharge,
-       col="red",
-       pch=19)     
+rug(dat_full_merge$decYear, 
+     side=1,
+     col="red",
+     lwd=2)
+legend("topleft", c("Discharge for All Years","Days with Complete Precipitation Measurements"),
+       lwd=c(2,2),
+       col=c("blue","red"),
+       bty="n")
+
+###Question 8###
+
