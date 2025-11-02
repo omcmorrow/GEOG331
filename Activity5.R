@@ -51,15 +51,11 @@ plot(datD$decYear, datD$discharge, type="l", xlab="Year", ylab=expression(paste(
 str(datD)
 #Finding number of observations in precipitation data
 str(datP)
-#Creating discharge vector
-discharge <- (datD$discharge)
-#Creating precipitation vector
-precip <- (datP$HPCP)
 #Finding frequency of discharge observations
-dis_freq_table <- table(discharge)
+dis_freq_table <- table(datD$discharge)
 print(dis_freq_table)
 #Finding frequency of precipitation observations
-precip_freq_table <- table(precip)
+precip_freq_table <- table(datP$HPCP)
 print(precip_freq_table)
 
 ###Question 4###
@@ -137,30 +133,33 @@ legend("topright", c("Mean Discharge for All Years","1 Standard Deviation","2017
        bty="n")
 
 ###Question 7###
-#Finding what days have full 24 hours of measurements
-precip_agg <- aggregate(datP$HPCP, by=list(datP$year, datP$doy), FUN="length")
-colnames(precip_agg) <- c("year", "doy", "observations")
-print(precip_agg)
-dates_table <- table(datP$jdate)
-print(dates_table)
-#Creating dataframe for only days with 24 hours of measurements
-dat_full_precip <- data.frame(subset(precip_agg, observations == 24))
+#Creating a new date column to find observation frequency
+datP$new_date <- as.Date(datP$DATE, format = "%Y%m%d")
+#Finding observation frequencies for all days
+date_freq <- table(datP$new_date)
+print(date_freq)
+#Subsetting dates with all 24 precipitation measurements
+full_precip <- as.Date(names(date_freq[date_freq == 24]), format = "%Y-%m-%d")
 print(full_precip)
-#Joining together full precipitation data days to discharge
-dat_full_merge <- merge(x = datD, y = dat_full_precip, by = "doy", all.x = TRUE)
-print(dat_full_merge[1,])
-#Joining together all other precipitation data days to discharge
+#Creating dataframe for only days with 24 hours of measurements
+dat_full_precip <- datP[datP$new_date %in% as.Date(full_precip),]
+print(dat_full_precip)
+#Formatting correct date for discharge
+datD$Date <- datesD
+#Creating a binary variable column based on full precipitation measurements
+datD$full_precip <- datD$Date %in% full_precip
 #Plotting all discharge measurements
 dev.new(width=8,height=8)
 par(mai=c(1,1,1,1))
-plot(datD$decYear, datD$discharge,
+plot(datD$Date, datD$discharge,
      type="h",
      col="blue",
      xlab="Date", 
      ylab=expression(paste("Discharge ft"^"3 ","sec"^"-1")),
      main="Discharge Overlaid with Days of Complete Precipitation Measurements",
      lwd=2)
-rug(dat_full_merge$decYear, 
+#Adding in rug tick marks on x axis to show full precipitation days
+rug(datD$Date[datD$full_precip], 
      side=1,
      col="red",
      lwd=2)
@@ -170,4 +169,86 @@ legend("topleft", c("Discharge for All Years","Days with Complete Precipitation 
        bty="n")
 
 ###Question 8###
+#Subsetting discharge and precipitation for September 5 and 6, 2011
+hydroD <- datD[datD$doy >= 248 & datD$doy < 250 & datD$year == 2011,]
+hydroP <- datP[datP$doy >= 248 & datP$doy < 250 & datP$year == 2011,]
+#Looking at minimum flow
+min(hydroD$discharge)
+#Using floor to round down the minimum of discharge range
+yl <- floor(min(hydroD$discharge))-1
+#Using ceiling to round up the maximum of discharge range
+yh <- ceiling(max(hydroD$discharge))+1
+#Finding the range for precipitation
+pl <- 0
+pm <-  ceiling(max(hydroP$HPCP))+.5
+#Scaling precipitation to fit on plot
+hydroP$pscale <- (((yh-yl)/(pm-pl)) * hydroP$HPCP) + yl
+#Plotting discharge
+par(mai=c(1,1,1,1))
+plot(hydroD$decDay,
+     hydroD$discharge, 
+     type="l", 
+     ylim=c(yl,yh), 
+     lwd=2,
+     xlab="Day of year", 
+     ylab=expression(paste("Discharge ft"^"3 ","sec"^"-1")))
+#Adding precipitation bars
+for(i in 1:nrow(hydroP)){
+  polygon(c(hydroP$decDay[i]-0.017,hydroP$decDay[i]-0.017,
+            hydroP$decDay[i]+0.017,hydroP$decDay[i]+0.017),
+          c(yl,hydroP$pscale[i],hydroP$pscale[i],yl),
+          col=rgb(0.392, 0.584, 0.929,.2), border=NA)
+}
+#Subsetting discharge and precipitation for January 12, 2011
+hydro1 <- datD[datD$doy == 12 & datD$year == 2011,]
+hydro2 <- datP[datP$doy == 12 & datP$year == 2011,]
+#Repeating steps for ranges
+yl <- floor(min(hydro1$discharge))-1
+yh <- ceiling(max(hydro1$discharge))+1
+pl <- 0
+pm <-  ceiling(max(hydro2$HPCP))+.5
+hydro2$pscale <- (((yh-yl)/(pm-pl)) * hydro2$HPCP) + yl
+#New plot
+par(mai=c(1,1,1,1))
+plot(hydro1$decDay,
+     hydro1$discharge, 
+     type="l", 
+     ylim=c(yl,yh), 
+     lwd=2,
+     main="Hydrograph for January 12, 2011",
+     xlab="Day of year", 
+     ylab=expression(paste("Discharge ft"^"3 ","sec"^"-1")))
+#Adding precipitation bars
+for(i in 1:nrow(hydro2)){
+  polygon(c(hydro2$decDay[i]-0.017,hydro2$decDay[i]-0.017,
+            hydro2$decDay[i]+0.017,hydro2$decDay[i]+0.017),
+          c(yl,hydro2$pscale[i],hydro2$pscale[i],yl),
+          col=rgb(0.392, 0.584, 0.929,.2), border=NA)
+}
+legend("topleft", c("Discharge", "Precipitation"),
+       lwd=c(2,NA),
+       col=c("black",rgb(0.392, 0.584, 0.929,.2)),
+       pch=c(NA,15),
+       bty="n")
 
+###Question 9###
+library(ggplot2)
+#Turning year into factor data
+datD$yearPlot <- as.factor(datD$year)
+#Making a boxplot
+ggplot(data= datD, aes(yearPlot,discharge)) + 
+  geom_boxplot()
+#Making a violin plot
+ggplot(data= datD, aes(yearPlot,discharge)) + 
+  geom_violin()
+#Making a factor variable for calendar seasons
+winter1 <- datD[datD$doy >= 1 & datD$doy < 80 & datD$year == 2016,]
+winter2 <- datD[datD$doy >= 356 & datD$doy <= 366 & datD$year == 2016,]
+spring <- datD[datD$doy >= 80 & datD$doy < 172 & datD$year == 2016,]
+summer <- datD[datD$doy >= 173 & datD$doy < 265 & datD$year == 2016,]
+fall <- datD[datD$doy >= 266 & datD$doy < 355 & datD$year == 2016,]
+Winter1 <- as.factor(winter1$doy)
+Winter2 <- as.factor(winter2$doy)
+Spring <- as.factor(spring$doy)
+seasons <- as.factor(datD$doy,
+                     levels)
