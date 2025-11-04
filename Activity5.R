@@ -241,14 +241,24 @@ ggplot(data= datD, aes(yearPlot,discharge)) +
 #Making a violin plot
 ggplot(data= datD, aes(yearPlot,discharge)) + 
   geom_violin()
-#Making a factor variable for calendar seasons
-winter1 <- datD[datD$doy >= 1 & datD$doy < 80 & datD$year == 2016,]
-winter2 <- datD[datD$doy >= 356 & datD$doy <= 366 & datD$year == 2016,]
-spring <- datD[datD$doy >= 80 & datD$doy < 172 & datD$year == 2016,]
-summer <- datD[datD$doy >= 173 & datD$doy < 265 & datD$year == 2016,]
-fall <- datD[datD$doy >= 266 & datD$doy < 355 & datD$year == 2016,]
-Winter1 <- as.factor(winter1$doy)
-Winter2 <- as.factor(winter2$doy)
-Spring <- as.factor(spring$doy)
-seasons <- as.factor(datD$doy,
-                     levels)
+#Defining ranges of seasons for 2016
+datD$seasons2016 <- with(datD, ifelse(doy %in% 1:81 | doy %in% 356:366, "Winter", 
+                                 ifelse(doy %in% 82:172, "Spring",
+                                        ifelse(doy %in% 173:265, "Summer", "Fall"))))
+#Defining ranges of seasons for 2017
+datD$seasons2017 <- with(datD, ifelse(doy %in% 1:80 | doy %in% 355:365, "Winter", 
+                                 ifelse(doy %in% 81:171, "Spring",
+                                        ifelse(doy %in% 172:264, "Summer", "Fall"))))
+#Subsetting data for 2016 and 2017
+dat2016 <- subset(datD, year == 2016)
+dat2017 <- subset(datD, year ==2017)
+#Violin plot for 2016
+ggplot(dat2016, aes(x = seasons2016, y = discharge)) + 
+  geom_violin(fill = "lightblue", color = "black") +
+  labs(title = "Seasonal Discharge for 2016", x = "Season", y = expression(paste("Discharge ft"^"3 ","sec"^"-1"))) +
+  theme_minimal()
+#Violin plot for 2017
+ggplot(dat2017, aes(x = seasons2017, y = discharge)) + 
+  geom_violin(fill = "lightblue", color = "black") +
+  labs(title = "Seasonal Discharge for 2017", x = "Season", y = expression(paste("Discharge ft"^"3 ","sec"^"-1"))) +
+  theme_minimal()
