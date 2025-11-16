@@ -18,7 +18,7 @@ monthly_summary <- datD %>%
     monthly_min = min(value, na.rm = TRUE)
   )
 print(monthly_summary, n = 301)
-#Plotting monthly max and min discharge (1998-2025)
+#Plotting monthly max and min discharge (2000-2024)
 library(ggplot2)
 ggplot(data = monthly_summary, aes(x = year_month)) +
   geom_line(aes(y = monthly_max, color = "Monthly Max"), linewidth = 1) +
@@ -27,3 +27,24 @@ ggplot(data = monthly_summary, aes(x = year_month)) +
   labs(title = "Monthly Max and Min Discharge for the Colorado River Below Laguna Dam, AZ-CA (2000-2024)",
        x = "Date", y = expression(paste("Discharge ft"^"3 ","sec"^"-1"))) + theme_minimal()
 
+##Plotting annual sums of discharge
+#Removing the first day of 2025
+day_to_remove <- as.Date("2025-01-01")
+datDnew <- datD %>%
+  filter(Date != day_to_remove)
+#Calculating annual discharge sums
+annual_sums <- datDnew %>%
+  mutate(Year = format(Date, "%Y")) %>%
+  group_by(Year) %>%                  
+  summarise(Total_Discharge_cfs = sum(value, na.rm = TRUE)) %>% 
+  ungroup() %>%
+  mutate(Year = as.numeric(Year))
+#Plotting
+ggplot(annual_sums, aes(x = Year, y = Total_Discharge_cfs)) +
+  geom_line(color = "blue", linewidth = 1.5) + 
+  geom_point(color = "blue") +
+  labs(title = "Annual Total Discharge Trend for the Colorado River Below Laguna Dam, AZ-CA (2000-2024)",
+       x = "Year",
+       y = expression(paste("Discharge ft"^"3 ","sec"^"-1"))) +
+  theme_bw() +
+  scale_x_continuous(breaks = seq(min(annual_sums$Year), max(annual_sums$Year), by = 5))
