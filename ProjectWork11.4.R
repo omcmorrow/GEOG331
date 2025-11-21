@@ -48,3 +48,54 @@ ggplot(annual_sums, aes(x = Year, y = Total_Discharge_cfs)) +
        y = expression(paste("Discharge ft"^"3 ","sec"^"-1"))) +
   theme_bw() +
   scale_x_continuous(breaks = seq(min(annual_sums$Year), max(annual_sums$Year), by = 5))
+
+##Plotting normalized river discharge
+#Reading in precipitation data for the upper and lower basins
+install.packages("dataRetrieval")
+library(dataRetrieval)
+datUp <- read.csv("Z:/omcmorrow/Project_Folder/Upper_CRB_Precip_2000-2024.csv",stringsAsFactors = T)
+datLow <- read.csv("Z:/omcmorrow/Project_Folder/Lower_CRB_Precip_2000-2024.csv",stringsAsFactors = T)
+#Changing upper basin to numeric format
+datUp$X...Upper.Colorado.River.Basin.Precipitation <- as.character(datUp$X...Upper.Colorado.River.Basin.Precipitation)
+datUp$X...Upper.Colorado.River.Basin.Precipitation <- as.numeric(datUp$X...Upper.Colorado.River.Basin.Precipitation)
+Monthly_Precip <- datUp[-c(1:2),]
+dat_monthly_means$precip <- Monthly_Precip
+print(monthly_means)
+Monthly_means <- datD %>%
+  mutate(datD,
+         Year = format(Date, "%Y"), Month = format(Date, "%m"))
+dat_monthly_means <- Monthly_means %>%
+  group_by(Year, Month) %>%
+  summarise(mean_discharge_cfs = mean(value, na.rm = TRUE), .groups = 'drop')
+dat_monthly_means <- head(dat_monthly_means, -1)
+#Plotting monthly mean discharge vs monthly precipitation in the upper basin
+scale_factor <- max(dat_monthly_means$mean_discharge_cfs) / max(dat_monthly_means$precip)
+
+ggplot(dat_monthly_means, aes(x = Year)) +
+  geom_line(aes(y = mean_discharge_cfs, color = "Discharge ft³/s)"), size = 1.1) +
+  geom_bar(aes(y = precip * scale_factor, fill = "Precipitation (in)"),
+           stat = "identity", alpha = 0.4) +
+  scale_y_continuous(
+    name = "Discharge (ft³/s)",
+    sec.axis = sec_axis(~ . / scale_factor, name = "Precipitation (in)")
+  ) +
+  scale_color_manual(values = c("Discharge (ft³/s)" = "black")) +
+  scale_fill_manual(values = c("Precipitation (in)" = "lightblue")) +
+  labs(x = "Year", title = "Discharge and Precipitation") +
+  theme_minimal() +
+  theme(
+    legend.title = element_blank(),
+    axis.title.y.right = element_text(color = "black"),
+    axis.title.y.left  = element_text(color = "black")
+  )
+
+
+plot(dat_monthly_means$Year, dat_monthly_means$precip, type = "h", col = "lightgray", lwd = 13,
+     ylab = "Precipitation (in)", xlab = "Year")
+
+par(new = TRUE)  # allow overlaying a second plot
+
+plot(dat_monthly_means$Year, dat_monthly_means$mean_discharge_cfs, type = "h", col = "blue" , lwd = 2,
+     axes = FALSE, xlab = "", ylab = "")
+axis(side = 4)  # add right axis
+mtext("Discharge (ft³/s)", side = 4, line = 3)
