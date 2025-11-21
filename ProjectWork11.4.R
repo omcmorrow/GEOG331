@@ -89,8 +89,8 @@ ggplot(dat_monthly_means, aes(x = Year)) +
     axis.title.y.left  = element_text(color = "black")
   )
 
-
-plot(dat_monthly_means$Year, dat_monthly_means$precip, type = "h", col = "lightgray", lwd = 13,
+par(mar = c(5.1, 4.1, 4.1, 4.2))
+plot(dat_monthly_means$Year, dat_monthly_means$precip, type = "h", col = "lightgray", lwd = 20,
      ylab = "Precipitation (in)", xlab = "Year")
 
 par(new = TRUE)  # allow overlaying a second plot
@@ -99,3 +99,11 @@ plot(dat_monthly_means$Year, dat_monthly_means$mean_discharge_cfs, type = "h", c
      axes = FALSE, xlab = "", ylab = "")
 axis(side = 4)  # add right axis
 mtext("Discharge (ft³/s)", side = 4, line = 3)
+legend("topleft",
+       legend = c("Precipitation (in)", "Discharge (ft³/s)"),
+       col = c("lightgray", "blue"),
+       lty = c(1,1),
+       bty = "n",
+       cex = 0.7
+       )
+title(main = "Colorado River Discharge Below Laguna Dam, AZ-CA vs Annual Precipitation of the Upper CRB (2000-2024)")
