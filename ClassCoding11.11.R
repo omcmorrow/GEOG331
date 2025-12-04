@@ -3,7 +3,41 @@ library(terra)
 library(tidyterra)
 library(FedData)
 #Listing all class files
-f <- list.files("Z:/GEOG331_F25/data/landsat", full.names = T)
+f <- list.files("Z:/data/landsat", full.names = T)
 #Opening list
 f
+lc <- rast(f[3:10])
+lc[[5]]
+summary(lc[[5]])
+plot(lc[[5]])
+plot(lc[[5]]*0.0000275-0.2)
+ndvi <- (lc[[5]]-lc[[4]])/(lc[[5]]+lc[[4]])
+names(ndvi) <- "NDVI"
+# create a quick plot to see how the data looks
+plot(ndvi)
+# read in the shape file of dec lands
+dec <- vect("Z:/data/NYS_DEC_Lands/")
 
+# remember from last time that the attribute table just like a data frame
+# we'll use this to subset to Madison County
+mad_dec <- dec[dec$COUNTY=="MADISON",]
+
+# we could also use the crop function
+# what dimensions of our raster layer are used to crop the vector layer
+lc_dec <- crop(dec,lc)
+
+# lastly, create a buffer around the Madison County DEC lands
+# what are the units? 
+mad_buf <- buffer(mad_dec, width = 1000, singlesided = T)
+
+# create a plot to look at our Madison County data
+plot(mad_dec, col = "red")
+plot(mad_buf, col = "yellow", add = T)
+# calculate ndvi for dec lands
+mad_dec$ndvi_in <- zonal(ndvi, mad_dec, fun = "mean")
+
+# calculate ndvi for the buffer outside dec lands
+mad_dec$ndvi_out <- zonal(ndvi, mad_buf, fun = "mean")
+
+# calculate the difference to see if DEC lands are more productive
+mad_dec$ndvi_dif <- mad_dec$ndvi_in-mad_dec$ndvi_out
