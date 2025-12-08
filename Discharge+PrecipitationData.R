@@ -1,6 +1,8 @@
 #Reading in USGS discharge data
 install.packages("dataRetrieval")
 library(dataRetrieval)
+library(dplyr)
+library(lubridate)
 datD <- read.csv("Z:/omcmorrow/Project_Folder/DailyDischargeDataLagunaDam/DailyDischargeLagunaDam2000_2024.csv",stringsAsFactors = T)
 #Reading column headers for data
 head(datD)
@@ -13,16 +15,17 @@ datDnew <- datD %>%
   filter(Date != day_to_remove)
 #Converting cfs discharge data to cms (cubic meters / second)
 multiplier1 <- 0.0283168 #scalefactor between cfs and cms
-datDnew$value <- datDnew$value * multiplier
+datDnew$value <- datDnew$value * multiplier1
+datDis <- datDnew %>%
+  rename(discharge_cms = value)
 #Extracting monthly max and min discharge (2000-2024)
-library(dplyr)
-library(lubridate)
-monthly_summary <- datDnew %>%
+monthly_summary <- datDis %>%
   mutate(year_month = floor_date(Date, "month")) %>%
   group_by(year_month) %>%
   summarise(
-    monthly_max = max(value, na.rm = TRUE),
-    monthly_min = min(value, na.rm = TRUE)
+    monthly_max = max(discharge_cms, na.rm = TRUE),
+    monthly_min = min(discharge_cms, na.rm = TRUE),
+    monthly_sum = sum(discharge_cms, na.rm = TRUE)
   )
 print(monthly_summary, n = 300)
 #Plotting monthly max and min discharge (2000-2024)
@@ -35,6 +38,7 @@ ggplot(data = monthly_summary, aes(x = year_month)) +
        x = "Date", y = expression(paste("Discharge m"^"3 ","sec"^"-1"))) + theme_minimal()
 
 
+###Manipulation of discharge and precipitation data to normalize discharge based on precipitation
 #Reading in precipitation data for the upper and lower basins (2000-2024)
 datUp <- read.csv("Z:/omcmorrow/Project_Folder/PrecipitationData/Upper_CRB_Precip_2000-2024.csv",stringsAsFactors = T)
 datLow <- read.csv("Z:/omcmorrow/Project_Folder/PrecipitationData/Lower_CRB_Precip_2000-2024.csv",stringsAsFactors = T)
@@ -55,11 +59,30 @@ dat_total_precip$Precip <- NULL
 print(dat_total_precip)
 #Converting precip from inches to meters
 multiplier2 <- 0.0254
-dat_monthly_means$totalprecip_ins <- dat_monthly_means$totalprecip_ins * multiplier2
-dat_monthly_data <- dat_monthly_means %>%
-  rename(total_precip_m = totalprecip_ins)
-#Creating precip value column to be joined to discharge
-monthly_precip <- dat_total_precip[-c(1,2),]
+dat_total_precip$SummedPrecip <- dat_total_precip$SummedPrecip * multiplier2
+dat_precip <- dat_total_precip %>%
+  rename(precip_m = SummedPrecip)
+#Calculating volume of rainfall from precip and basin area
+multiplier3 <- 640000000000
+dat_precip$volume_m3 <- dat_precip$precip_m * multiplier3
+print(dat_precip)
+#Creating precip volume column to be joined to discharge
+monthly_precip_vol <- dat_precip[-c(1,2),2]
+#Joining total monthly precip volume to monthly discharge sums
+monthly_summary$monthly_precip_vol <- monthly_precip_vol
+print(monthly_summary, n = 300)
+#Calculating runoff ratio (volume discharge / volume precipitation) to normalize discharge
+monthly_summary$runoffratio <- monthly_summary$monthly_sum / monthly_summary$monthly_precip_vol * 100
+print(monthly_summary, n = 300)
+#Plotting runoff ratio
+ggplot(data = monthly_summary, aes(year_month, runoffratio)) +
+  geom_line() + theme_minimal() + labs(title = "Colorado River Basin Monthly Runoff Ratio Below Laguna Dam, AZ-CA (2000-2024)", x = "Date", y = "Runoff Ratio")
+#Saving monthly summary discharge and precip dataframe
+install.packages("readr")
+library(readr)
+write_csv(monthly_summary, "Z:/omcmorrow/Project_Folder/JoinedDisPrecipData/MonthlySummary.csv")
+
+
 #Calculating monthly means for river discharge (2000-2024)
 monthly_means <- datDnew %>%
   mutate(datDnew,
@@ -68,12 +91,7 @@ dat_monthly_means <- monthly_means %>%
   group_by(Year, Month) %>%
   summarise(mean_discharge_cfs = mean(value, na.rm = TRUE), .groups = 'drop')
 print(dat_monthly_means, n = 300)
-#Joining total monthly precip to monthly discharge means
-dat_monthly_means$totalprecip_ins <- monthly_precip
-print(dat_monthly_means)
-#Calculating runoff ratio (total discharge / total precipitation) to normalize discharge
-dat_monthly_means$runoffratio <- dat_monthly_means$mean_discharge_cfs / dat_monthly_means$totalprecip_ins
-print(dat_monthly_means)
+
 
 
 ##Plotting annual sums of discharge
@@ -93,26 +111,3 @@ ggplot(annual_sums, aes(x = Year, y = Total_Discharge_cfs)) +
        y = expression(paste("Discharge ft"^"3 ","sec"^"-1"))) +
   theme_bw() +
   scale_x_continuous(breaks = seq(min(annual_sums$Year), max(annual_sums$Year), by = 5))
-
-
-#Plotting monthly mean discharge vs monthly precipitation in the upper basin
-scale_factor <- max(dat_monthly_means$mean_discharge_cfs) / max(dat_monthly_means$precip)
-
-par(mar = c(5.1, 4.1, 4.1, 4.2))
-plot(dat_monthly_means$Year, dat_monthly_means$precip, type = "h", col = "lightgray", lwd = 20,
-     ylab = "Precipitation (in)", xlab = "Year")
-
-par(new = TRUE)  # allow overlaying a second plot
-
-plot(dat_monthly_means$Year, dat_monthly_means$mean_discharge_cfs, type = "h", col = "blue" , lwd = 2,
-     axes = FALSE, xlab = "", ylab = "")
-axis(side = 4)  # add right axis
-mtext("Discharge (ft³/s)", side = 4, line = 3)
-legend("topleft",
-       legend = c("Precipitation (in)", "Discharge (ft³/s)"),
-       col = c("lightgray", "blue"),
-       lty = c(1,1),
-       bty = "n",
-       cex = 0.7
-       )
-title(main = "Colorado River Discharge Below Laguna Dam, AZ-CA vs Annual Precipitation of the Upper CRB (2000-2024)")
