@@ -19,14 +19,58 @@ crop_rast_2000 <- crop(rast_2000, basin_shp_proj)
 mask_rast_2000 <- mask(crop_rast_2000, basin_shp_proj)
 #Plotting land cover
 plot(mask_rast_2000, main = "Colorado River Basin Land Cover (2000)")
+#Saving new masked raster
+writeRaster(mask_rast_2000, "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2000_rast.tif", overwrite = TRUE)
 #Copying the masked raster for reclassification
-copy_filepath <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data"
-writeRaster(mask_rast_2000, filename = copy_filepath, format = "GTiff", overwrite = TRUE)
+install.packages("gdalraster")
+library(gdalraster)
+real_filepath_2000 <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2000_rast.tif"
+copy_filepath_2000 <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2000_rast.copy.tif"
+createCopy(format = "GTiff", dst_filename = copy_filepath_2000, src_filename = real_filepath_2000)
 #Reclassifying raster classes to agriculture and non agriculture
-class_counts <- freq(mask_rast_2000)
-print(class_counts)
+copy_mask_rast_2000 <- rast("Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2000_rast.copy.tif")
+class_counts_2000 <- freq(copy_mask_rast_2000)
+print(class_counts_2000)
 rcl_matrix <- matrix(c(
-  0, 12, 1,
-  15, 16, 1,
-  13, 14, 2
+  0, 79, 1,
+  84, 95, 1,
+  80, 83, 2 #classes 81 and 82 are pasture/hay and cultivated crops to be aggregated as agriculture land cover
 ), ncol = 3, byrow = TRUE)
+reclass_2000 <- classify(copy_mask_rast_2000, rcl_matrix, right = TRUE)
+reclass_counts_2000 <- freq(reclass_2000)
+print(reclass_counts_2000)
+landcov_cols <- c("#C8BAAE", "yellow")
+landcov_classes <- c("Non-Agricultural Land", "Agricultural Land\n(pasture/hay/cultivated crops)")
+par(mar = c(5, 4, 4, 8), xpd = TRUE)
+plot(reclass_2000, col = landcov_cols, main = "Colorado River Basin Agricultural vs Non-Agricultural Land Cover (2000)", legend = FALSE)
+legend("topleft", inset = c(0.22, 0), legend = landcov_classes, fill= landcov_cols ,bty="n", cex = 0.7)
+
+
+#Repeating all steps for 2024 raster
+rast_2024 <- rast("Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Annual_NLCD_LndCov_2024_CU_C1V1.tif")
+crs(rast_2024)
+st_crs(basin_shp)
+basin_shp_proj <- st_transform(basin_shp, crs(rast_2024))
+crop_rast_2024 <- crop(rast_2024, basin_shp_proj)
+mask_rast_2024 <- mask(crop_rast_2024, basin_shp_proj)
+plot(mask_rast_2024, main = "Colorado River Basin Land Cover (2024)")
+writeRaster(mask_rast_2024, "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2024_rast.tif", overwrite = TRUE)
+real_filepath_2024 <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2024_rast.tif"
+copy_filepath_2024 <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2024_rast.copy.tif"
+createCopy(format = "GTiff", dst_filename = copy_filepath_2024, src_filename = real_filepath_2024)
+copy_mask_rast_2024 <- rast("Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2024_rast.copy.tif")
+class_counts_2024 <- freq(copy_mask_rast_2024)
+print(class_counts_2024)
+rcl_matrix <- matrix(c(
+  0, 79, 1,
+  84, 95, 1,
+  80, 83, 2
+), ncol = 3, byrow = TRUE)
+reclass_2024 <- classify(copy_mask_rast_2024, rcl_matrix, right = TRUE)
+reclass_counts_2024 <- freq(reclass_2024)
+print(reclass_counts_2024)
+landcov_cols <- c("#C8BAAE", "yellow")
+landcov_classes <- c("Non-Agricultural Land", "Agricultural Land\n(pasture/hay/cultivated crops)")
+par(mar = c(5, 4, 4, 8), xpd = TRUE)
+plot(reclass_2024, col = landcov_cols, main = "Colorado River Basin Agricultural vs Non-Agricultural Land Cover (2024)", legend = FALSE)
+legend("topleft", inset = c(0.22, 0), legend = landcov_classes, fill= landcov_cols ,bty="n", cex = 0.7)
