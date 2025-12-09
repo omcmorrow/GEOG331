@@ -1,3 +1,4 @@
+###Manipulation of discharge data
 #Reading in USGS discharge data
 install.packages("dataRetrieval")
 library(dataRetrieval)
@@ -83,31 +84,16 @@ library(readr)
 write_csv(monthly_summary, "Z:/omcmorrow/Project_Folder/JoinedDisPrecipData/MonthlySummary.csv")
 
 
-#Calculating monthly means for river discharge (2000-2024)
-monthly_means <- datDnew %>%
-  mutate(datDnew,
-         Year = format(Date, "%Y"), Month = format(Date, "%m"))
-dat_monthly_means <- monthly_means %>%
-  group_by(Year, Month) %>%
-  summarise(mean_discharge_cfs = mean(value, na.rm = TRUE), .groups = 'drop')
-print(dat_monthly_means, n = 300)
-
-
-
-##Plotting annual sums of discharge
-#Calculating annual discharge sums
-annual_sums <- datDnew %>%
-  mutate(Year = format(Date, "%Y")) %>%
-  group_by(Year) %>%                  
-  summarise(Total_Discharge_cfs = sum(value, na.rm = TRUE)) %>% 
-  ungroup() %>%
-  mutate(Year = as.numeric(Year))
-#Plotting
-ggplot(annual_sums, aes(x = Year, y = Total_Discharge_cfs)) +
-  geom_line(color = "blue", linewidth = 1.5) + 
-  geom_point(color = "blue") +
-  labs(title = "Annual Total Discharge Trend for the Colorado River Below Laguna Dam, AZ-CA (2000-2024)",
-       x = "Year",
-       y = expression(paste("Discharge ft"^"3 ","sec"^"-1"))) +
-  theme_bw() +
-  scale_x_continuous(breaks = seq(min(annual_sums$Year), max(annual_sums$Year), by = 5))
+#Finding annual sums of discharge
+annual_summary <- datDis %>%
+  mutate(year = year(Date)) %>%
+  group_by(year) %>%
+  summarise(annual_sum = sum(discharge_cms, na.rm = TRUE))
+#Matching dataframe to have same years as land cover data
+years_to_remove <- c(2001,2002,2003,2004,2005,2007,2008,2009,2010,2011,2013,2014,2015,2016,2017,2019,2020,2021,2022,2023)
+annual_summary <- annual_summary %>% filter(!year %in% years_to_remove)
+annual_summary$precip_m <- c(0.630936, 0.66167, 0.51562, 0.600964, 0.646684)
+annual_summary$volume_m3 <- annual_summary$precip_m * multiplier3
+annual_summary$runoffratio <- annual_summary$annual_sum / annual_summary$volume_m3
+#Saving dataframe
+write_csv(annual_summary, "Z:/omcmorrow/Project_Folder/JoinedDisPrecipData/AnnualSummary.csv")

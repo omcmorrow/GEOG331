@@ -50,7 +50,7 @@ writeRaster(reclass_2000, "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Recl
 
 
 #Repeating steps for all other rasters
-start_year <- 2001
+start_year <- 2003
 end_year <- 2024
 years <- start_year:end_year
 library(raster)
@@ -71,8 +71,15 @@ rcl_matrix <- matrix(c(
   84, 95, 1,
   80, 83, 2
 ), ncol = 3, byrow = TRUE)
-reclass_current_rast <- terra::classify(mask_current_rast, rcl_matrix, right = TRUE)
+reclass_current_rast <- reclassify(mask_current_rast, rcl_matrix, right = TRUE)
 output_file <- paste0(base_output, year, "_rast.tif")
 writeRaster(reclass_current_rast, filename = output_file, format = "GTiff", overwrite = TRUE)
 message(paste0("Processed and saved raster for year: ", year))
 }
+
+rast_2024 <- rast("Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Reclassed_2024_rast.tif")
+landcov_cols <- c("#C8BAAE", "yellow")
+landcov_classes <- c("Non-Agricultural Land", "Agricultural Land\n(pasture/hay/cultivated crops)")
+par(mar = c(5, 4, 4, 8), xpd = TRUE)
+plot(rast_2024, col = landcov_cols, main = "Colorado River Basin Agricultural vs Non-Agricultural Land Cover (2024)", legend = FALSE)
+legend("topleft", inset = c(0.22, 0), legend = landcov_classes, fill= landcov_cols ,bty="n", cex = 0.7)
