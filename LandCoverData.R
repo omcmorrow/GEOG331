@@ -1,11 +1,12 @@
 ##Plotting land cover of the colorado river basin for 2000
 #Reading in colorado river basin shapefile
 library(sf)
-basin_shp <- st_read("Z:/omcmorrow/Project_Folder/CRB_Outline")
+basin_shp <- st_read("Z:/omcmorrow/Project_Folder/CRB_Shapefile")
 #Changing the coordinate projection system of the shapefile
 st_crs(basin_shp)
 reproject_basin <- st_transform(basin_shp, crs = "+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
 #Reading in land cover data for 2000
+install.packages("raster")
 library(terra)
 library(tidyterra)
 library(FedData)
@@ -44,33 +45,34 @@ landcov_classes <- c("Non-Agricultural Land", "Agricultural Land\n(pasture/hay/c
 par(mar = c(5, 4, 4, 8), xpd = TRUE)
 plot(reclass_2000, col = landcov_cols, main = "Colorado River Basin Agricultural vs Non-Agricultural Land Cover (2000)", legend = FALSE)
 legend("topleft", inset = c(0.22, 0), legend = landcov_classes, fill= landcov_cols ,bty="n", cex = 0.7)
+#Saving final raster
+writeRaster(reclass_2000, "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Reclassed_2000_rast.tif", overwrite = TRUE)
 
 
-#Repeating all steps for 2024 raster
-rast_2024 <- rast("Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Annual_NLCD_LndCov_2024_CU_C1V1.tif")
-crs(rast_2024)
+#Repeating steps for all other rasters
+start_year <- 2001
+end_year <- 2024
+years <- start_year:end_year
+library(raster)
+base_url <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Annual_NLCD_LndCov_"
+file_extension <- "_CU_C1V1.tif"
+base_output <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Reclassed_"
+#For loop
+for (year in years) {
+input_file <- paste0(base_url, year, file_extension)
+current_raster <- raster(input_file)
+crs(current_raster)
 st_crs(basin_shp)
-basin_shp_proj <- st_transform(basin_shp, crs(rast_2024))
-crop_rast_2024 <- crop(rast_2024, basin_shp_proj)
-mask_rast_2024 <- mask(crop_rast_2024, basin_shp_proj)
-plot(mask_rast_2024, main = "Colorado River Basin Land Cover (2024)")
-writeRaster(mask_rast_2024, "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2024_rast.tif", overwrite = TRUE)
-real_filepath_2024 <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2024_rast.tif"
-copy_filepath_2024 <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2024_rast.copy.tif"
-createCopy(format = "GTiff", dst_filename = copy_filepath_2024, src_filename = real_filepath_2024)
-copy_mask_rast_2024 <- rast("Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Masked_2024_rast.copy.tif")
-class_counts_2024 <- freq(copy_mask_rast_2024)
-print(class_counts_2024)
+basin_shp_proj <- st_transform(basin_shp, crs(current_raster))
+crop_current_rast <- crop(current_raster, basin_shp_proj)
+mask_current_rast <- mask(crop_current_rast, basin_shp_proj)
 rcl_matrix <- matrix(c(
   0, 79, 1,
   84, 95, 1,
   80, 83, 2
 ), ncol = 3, byrow = TRUE)
-reclass_2024 <- classify(copy_mask_rast_2024, rcl_matrix, right = TRUE)
-reclass_counts_2024 <- freq(reclass_2024)
-print(reclass_counts_2024)
-landcov_cols <- c("#C8BAAE", "yellow")
-landcov_classes <- c("Non-Agricultural Land", "Agricultural Land\n(pasture/hay/cultivated crops)")
-par(mar = c(5, 4, 4, 8), xpd = TRUE)
-plot(reclass_2024, col = landcov_cols, main = "Colorado River Basin Agricultural vs Non-Agricultural Land Cover (2024)", legend = FALSE)
-legend("topleft", inset = c(0.22, 0), legend = landcov_classes, fill= landcov_cols ,bty="n", cex = 0.7)
+reclass_current_rast <- terra::classify(mask_current_rast, rcl_matrix, right = TRUE)
+output_file <- paste0(base_output, year, "_rast.tif")
+writeRaster(reclass_current_rast, filename = output_file, format = "GTiff", overwrite = TRUE)
+message(paste0("Processed and saved raster for year: ", year))
+}
