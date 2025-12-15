@@ -50,9 +50,7 @@ writeRaster(reclass_2000, "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Recl
 
 
 #Repeating steps for all other rasters
-start_year <- 2003
-end_year <- 2024
-years <- start_year:end_year
+years <- c(2003, 2006, 2009, 2012, 2015, 2018, 2021, 2024)
 library(raster)
 base_url <- "Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Annual_NLCD_LndCov_"
 file_extension <- "_CU_C1V1.tif"
