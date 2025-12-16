@@ -1,9 +1,10 @@
-###Manipulation of discharge data
-#Reading in USGS discharge data
-install.packages("dataRetrieval")
-library(dataRetrieval)
+#Reading in all required packages for full code
 library(dplyr)
 library(lubridate)
+library(ggplot2)
+
+
+#Reading in USGS discharge data
 datD <- read.csv("Z:/omcmorrow/Project_Folder/DailyDischargeDataLagunaDam/DailyDischargeLagunaDam2000_2024.csv",stringsAsFactors = T)
 #Reading column headers for data
 head(datD)
@@ -30,7 +31,6 @@ monthly_summary <- datDis %>%
   )
 print(monthly_summary, n = 300)
 #Plotting monthly max and min discharge (2000-2024)
-library(ggplot2)
 ggplot(data = monthly_summary, aes(x = year_month)) +
   geom_line(aes(y = monthly_max, color = "Monthly Max"), linewidth = 1) +
   geom_line(aes(y = monthly_min, color = "Monthly Min"), linewidth = 1) +
@@ -64,7 +64,7 @@ dat_total_precip$SummedPrecip <- dat_total_precip$SummedPrecip * multiplier2
 dat_precip <- dat_total_precip %>%
   rename(precip_m = SummedPrecip)
 #Calculating volume of rainfall from precip and basin area
-multiplier3 <- 640000000000
+multiplier3 <- 640000000000 #Area of the full basin in meters
 dat_precip$volume_m3 <- dat_precip$precip_m * multiplier3
 print(dat_precip)
 #Creating precip volume column to be joined to discharge
@@ -110,7 +110,6 @@ reproject_basin <- st_transform(basin_shp, crs = "+proj=aea +lat_0=23 +lon_0=-96
 install.packages("raster")
 library(terra)
 library(tidyterra)
-library(FedData)
 rast_2000 <- rast("Z:/omcmorrow/Project_Folder/NLCD_Land_Cover_Data/Annual_NLCD_LndCov_2000_CU_C1V1.tif")
 #Changing coordinate systems to match
 crs(rast_2000)
@@ -187,12 +186,6 @@ legend("topleft", inset = c(0.22, 0), legend = landcov_classes, fill= landcov_co
 
 
 #Reading in masked land cover data and monthly discharge + precip data
-library(dataRetrieval)
-library(dplyr)
-library(lubridate)
-library(terra)
-library(tidyterra)
-library(FedData)
 dat_annual_summary <- read.csv("Z:/omcmorrow/Project_Folder/JoinedDisPrecipData/AnnualSummary.csv")
 #Creating dataframe for agriculture pixel count by year
 year <- c("2000", "2006", "2012", "2018", "2024")
